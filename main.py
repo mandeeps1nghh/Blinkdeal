@@ -7,7 +7,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 
 from scraper import scrape_deals
 from detector import detect_new_deal
-from alerter import send_telegram_alert
+from alerter import send_telegram_alert, send_status_update
 from logger import log_deal
 
 
@@ -26,9 +26,11 @@ async def main():
     # Step 2: Detect if a new deal appeared
     should_alert, deal_data = detect_new_deal(scrape_result)
 
-    # Step 3: Send alert if new deal detected
+    # Step 3: Send alert if new deal detected, otherwise send status
     if should_alert:
         send_telegram_alert(deal_data)
+    else:
+        send_status_update(deal_data)
 
     # Step 4: Log the deal (whether active or not)
     log_deal(deal_data)
