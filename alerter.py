@@ -1,7 +1,9 @@
 import os
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 
 import requests
+
+IST = timezone(timedelta(hours=5, minutes=30))
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -16,7 +18,7 @@ def send_telegram_alert(deal_data):
     """Send a Telegram message about the active BlinkDeal."""
     coupon = deal_data.get("coupon_code") or "N/A"
     discount = deal_data.get("discount") or "N/A"
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    timestamp = datetime.now(IST).strftime("%Y-%m-%d %H:%M:%S IST")
 
     message = (
         f"\U0001f525 BlinkDeal LIVE on Myntra!\n\n"
@@ -42,7 +44,7 @@ def send_telegram_alert(deal_data):
 
 def send_status_update(deal_data):
     """Send a status message after every check so the user knows the bot ran."""
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    timestamp = datetime.now(IST).strftime("%Y-%m-%d %H:%M:%S IST")
 
     if deal_data.get("deal_active"):
         return  # Already handled by send_telegram_alert
@@ -50,7 +52,7 @@ def send_status_update(deal_data):
     message = (
         f"\u2705 BlinkDeal Bot checked at {timestamp}\n"
         f"Status: No active deal found.\n"
-        f"Next check in ~20 minutes."
+        f"Next check in ~15 minutes."
     )
 
     if not BOT_TOKEN or not CHAT_ID:
