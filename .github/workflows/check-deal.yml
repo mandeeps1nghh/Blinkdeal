@@ -1,0 +1,43 @@
+name: BlinkDeal Checker
+
+on:
+  schedule:
+    - cron: "*/20 * * * *"  # Every 20 minutes
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  check-deal:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          playwright install-deps chromium
+
+      - name: Run deal checker
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python main.py
+
+      - name: Commit state changes
+        run: |
+          git config user.name "BlinkDeal Bot"
+          git config user.email "blinkdeal-bot@users.noreply.github.com"
+          git add state.json deals.csv
+          git diff --staged --quiet || git commit -m "Update deal state [skip ci]"
+          git push
